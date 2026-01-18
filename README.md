@@ -1,2 +1,1 @@
-# rust_bootcamp
-RUST
+

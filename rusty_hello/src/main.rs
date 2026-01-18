@@ -7,11 +7,11 @@ struct Args {
     #[arg(long)]
     upper: bool,
 
-    /// Repeat greeting N times 
+    /// Repeat greeting N times
     #[arg(long, default_value_t = 1)]
     repeat: u32,
 
-    /// Name to greet [default:World] 
+    /// Name to greet [default:World]
     name: Option<String>,
 }
 
