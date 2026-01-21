@@ -56,14 +56,20 @@ fn main() {
     }
 }
 
+
 fn generate_grid(w: usize, h: usize) -> Vec<Vec<u8>> {
     let mut rng = rand::thread_rng();
     let mut grid = vec![vec![0u8; w]; h];
-    for r in 0..h {
-        for c in 0..w {
-            grid[r][c] = if r == 0 && c == 0 { 0 } 
-                         else if r == h-1 && c == w-1 { 255 } 
-                         else { rng.r#gen() };
+
+    for (r, row) in grid.iter_mut().enumerate() {
+        for (c, cell) in row.iter_mut().enumerate() {
+            *cell = if r == 0 && c == 0 { 
+                0 
+            } else if r == h - 1 && c == w - 1 { 
+                255 
+            } else { 
+                rng.r#gen() 
+            };
         }
     }
     grid
@@ -136,7 +142,7 @@ fn get_neighbors(pos: (usize, usize), rows: usize, cols: usize) -> Vec<(usize, u
         .collect()
 }
 
-fn find_path(grid: &Vec<Vec<u32>>, find_min: bool) -> Option<u32> {
+fn find_path(grid: &[Vec<u32>], find_min: bool) -> Option<u32> {
     let rows = grid.len();
     let cols = grid[0].len();
     let start = (0, 0);
@@ -147,8 +153,7 @@ fn find_path(grid: &Vec<Vec<u32>>, find_min: bool) -> Option<u32> {
 
     dists.insert(start, grid[0][0]);
 
-    // Pour le MAX, on utilise un Node avec un coût inversé dans le Min-Heap
-    // ou on pourrait implémenter un autre Node struct, mais voici une astuce simple :
+    
     let initial_cost = if find_min { grid[0][0] } else { u32::MAX - grid[0][0] };
     
     heap.push(Node { cost: initial_cost, pos: start });
