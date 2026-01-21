@@ -1,7 +1,7 @@
 use clap::Parser;
 use rand::Rng;
-use std::collections::{BinaryHeap, HashMap};
 use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashMap};
 use std::fs::{File, read_to_string};
 use std::io::Write;
 
@@ -45,7 +45,7 @@ fn main() {
             let h = parts[1].parse().unwrap_or(4);
             let grid = generate_grid(w, h);
             display_grid(&grid);
-            
+
             if let Some(path) = args.output {
                 save_to_file(&grid, &path);
             }
@@ -56,19 +56,18 @@ fn main() {
     }
 }
 
-
 fn generate_grid(w: usize, h: usize) -> Vec<Vec<u8>> {
     let mut rng = rand::thread_rng();
     let mut grid = vec![vec![0u8; w]; h];
 
     for (r, row) in grid.iter_mut().enumerate() {
         for (c, cell) in row.iter_mut().enumerate() {
-            *cell = if r == 0 && c == 0 { 
-                0 
-            } else if r == h - 1 && c == w - 1 { 
-                255 
-            } else { 
-                rng.r#gen() 
+            *cell = if r == 0 && c == 0 {
+                0
+            } else if r == h - 1 && c == w - 1 {
+                255
+            } else {
+                rng.r#gen()
             };
         }
     }
@@ -87,7 +86,8 @@ fn display_grid(grid: &Vec<Vec<u8>>) {
 fn save_to_file(grid: &Vec<Vec<u8>>, path: &str) {
     let mut file = File::create(path).expect("Unable to create file");
     for row in grid {
-        let line = row.iter()
+        let line = row
+            .iter()
             .map(|v| format!("{:02X}", v))
             .collect::<Vec<String>>()
             .join(" ");
@@ -100,11 +100,14 @@ fn save_to_file(grid: &Vec<Vec<u8>>, path: &str) {
 
 fn analyze_map(path: &str) {
     let content = read_to_string(path).expect("Failed to read file");
-    let grid: Vec<Vec<u32>> = content.lines()
+    let grid: Vec<Vec<u32>> = content
+        .lines()
         .filter(|l| !l.is_empty())
-        .map(|l| l.split_whitespace()
-            .map(|h| u32::from_str_radix(h, 16).expect("Invalid hex"))
-            .collect())
+        .map(|l| {
+            l.split_whitespace()
+                .map(|h| u32::from_str_radix(h, 16).expect("Invalid hex"))
+                .collect()
+        })
         .collect();
 
     let rows = grid.len();
@@ -135,7 +138,8 @@ fn get_neighbors(pos: (usize, usize), rows: usize, cols: usize) -> Vec<(usize, u
         vec![(-1, 0), (1, 0), (0, -1), (0, 1), (1, -1), (1, 1)]
     };
 
-    directions.into_iter()
+    directions
+        .into_iter()
         .map(|(dr, dc)| (r + dr, c + dc))
         .filter(|&(nr, nc)| nr >= 0 && nr < rows as i32 && nc >= 0 && nc < cols as i32)
         .map(|(nr, nc)| (nr as usize, nc as usize))
@@ -153,19 +157,31 @@ fn find_path(grid: &[Vec<u32>], find_min: bool) -> Option<u32> {
 
     dists.insert(start, grid[0][0]);
 
-    
-    let initial_cost = if find_min { grid[0][0] } else { u32::MAX - grid[0][0] };
-    
-    heap.push(Node { cost: initial_cost, pos: start });
+    let initial_cost = if find_min {
+        grid[0][0]
+    } else {
+        u32::MAX - grid[0][0]
+    };
+
+    heap.push(Node {
+        cost: initial_cost,
+        pos: start,
+    });
 
     while let Some(Node { cost, pos }) = heap.pop() {
         let current_actual_cost = if find_min { cost } else { u32::MAX - cost };
 
-        if pos == end { return Some(current_actual_cost); }
-        
+        if pos == end {
+            return Some(current_actual_cost);
+        }
+
         if let Some(&best) = dists.get(&pos) {
-            if find_min && current_actual_cost > best { continue; }
-            if !find_min && current_actual_cost < best { continue; }
+            if find_min && current_actual_cost > best {
+                continue;
+            }
+            if !find_min && current_actual_cost < best {
+                continue;
+            }
         }
 
         for next in get_neighbors(pos, rows, cols) {
@@ -178,8 +194,15 @@ fn find_path(grid: &[Vec<u32>], find_min: bool) -> Option<u32> {
 
             if is_better {
                 dists.insert(next, next_actual_cost);
-                let heap_cost = if find_min { next_actual_cost } else { u32::MAX - next_actual_cost };
-                heap.push(Node { cost: heap_cost, pos: next });
+                let heap_cost = if find_min {
+                    next_actual_cost
+                } else {
+                    u32::MAX - next_actual_cost
+                };
+                heap.push(Node {
+                    cost: heap_cost,
+                    pos: next,
+                });
             }
         }
     }
